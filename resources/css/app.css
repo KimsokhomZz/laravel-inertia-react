@@ -33,7 +33,7 @@
         @apply block text-sm font-medium leading-6 text-slate-900 first-letter:capitalize;
     }
     header {
-        @apply bg-slate-800 shadow-md;
+        @apply bg-[#F8C8DC] shadow-md;
     }
     nav {
         @apply p-5 max-w-screen-lg mx-auto flex items-center justify-between;
@@ -51,7 +51,7 @@
         @apply font-semibold text-red-500;
     }
     .nav-link {
-        @apply text-slate-200 hover:bg-slate-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium;
+        @apply text-[#DE3163] hover:bg-[#DE3163] hover:text-white rounded-md px-3 py-2 text-sm font-medium;
     }
     .title {
         @apply my-6 text-center text-3xl font-bold leading-9 text-slate-900;
