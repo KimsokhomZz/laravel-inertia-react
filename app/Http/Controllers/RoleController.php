@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Resources\RoleResource;
 use App\Models\Role;
+use Illuminate\Validation\Rule;
 
 class RoleController extends Controller
 {
@@ -20,7 +21,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        // Logic to show a form for creating a new user
+        return inertia('Admin/Roles/RoleCreate');
     }
 
     /**
@@ -28,7 +29,15 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        // Logic to store a new user in the database
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:30', Rule::unique('roles', 'name'),]
+        ]);
+        // Role::create($validated);
+        Role::create([
+            'name' => $validated['name'],
+            'guard_name' => 'web', // Default guard
+        ]);
+        return redirect()->route('roles.index')->with('success', 'Role created successfully');
     }
 
     /**
@@ -44,7 +53,10 @@ class RoleController extends Controller
      */
     public function edit($id)
     {
-        // Logic to show a form for editing a specific user
+        $role = Role::findOrFail($id);
+        return inertia('Admin/Roles/RoleEdit', [
+            'role' => new RoleResource($role),
+        ]);
     }
 
     /**
@@ -52,7 +64,18 @@ class RoleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Logic to update a specific user in the database
+        // Validate the request
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:30', Rule::unique('roles', 'name')->ignore($id)],
+        ]);
+
+        // Find the role
+        $role = Role::findOrFail($id);
+
+        // Update the role
+        $role->update($validated);
+
+        return redirect()->route('roles.index')->with('success', 'Role updated successfully');
     }
 
     /**
@@ -60,6 +83,10 @@ class RoleController extends Controller
      */
     public function destroy($id)
     {
-        // Logic to delete a specific user from the database
+        // Find the role
+        $role = Role::findOrFail($id);
+        // Delete the role
+        $role->delete();
+        return back()->with('success', 'Role deleted successfully.');
     }
 }

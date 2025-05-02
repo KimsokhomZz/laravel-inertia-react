@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\PermissionResource;
 use Illuminate\Http\Request;
 use App\Models\Permission;
+use Illuminate\Validation\Rule;
 
 class PermissionController extends Controller
 {
@@ -20,7 +21,8 @@ class PermissionController extends Controller
      */
     public function create()
     {
-        // Logic to show a form for creating a new user
+
+        return inertia('Admin/Permissions/PermissionCreate');
     }
 
     /**
@@ -28,7 +30,15 @@ class PermissionController extends Controller
      */
     public function store(Request $request)
     {
-        // Logic to store a new user in the database
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:30', Rule::unique('permissions', 'name')],
+            // 'guard_name' => ['required', 'string', 'max:30'],
+        ]);
+        Permission::create([
+            'name' => $validated['name'],
+            'guard_name' => 'web', // Default guard
+        ]);
+        return redirect()->route('permissions.index')->with('success', 'Permission created successfully');
     }
 
     /**
@@ -45,6 +55,11 @@ class PermissionController extends Controller
     public function edit($id)
     {
         // Logic to show a form for editing a specific user
+        $permission = Permission::findOrFail($id);
+
+        return inertia('Admin/Permissions/PermissionEdit', [
+            'permission' => new PermissionResource($permission),
+        ]);
     }
 
     /**
@@ -53,6 +68,15 @@ class PermissionController extends Controller
     public function update(Request $request, $id)
     {
         // Logic to update a specific user in the database
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:30', Rule::unique('permissions', 'name')->ignore($id)],
+            // 'guard_name' => ['required', 'string', 'max:30'],
+        ]);
+
+        // Find the permission by ID and update it
+        $permission = Permission::findOrFail($id);
+        $permission->update($validated);
+        return redirect()->route('permissions.index')->with('success', 'Permission updated successfully');
     }
 
     /**
@@ -61,5 +85,8 @@ class PermissionController extends Controller
     public function destroy($id)
     {
         // Logic to delete a specific user from the database
+        $permission = Permission::findOrFail($id);
+        $permission->delete();
+        return back()->with('success', 'Permission deleted successfully');
     }
 }
